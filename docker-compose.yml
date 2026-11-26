@@ -1,0 +1,31 @@
+services:
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      MONGODB_URL: mongodb://mongo:27017/eventora
+      JWT_SECRET: local_dev_secret
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+    depends_on:
+      - mongo
+
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo_data:
